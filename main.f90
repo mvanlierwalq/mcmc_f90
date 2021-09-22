@@ -259,7 +259,8 @@ PRINT*, 'STARTING MARCUS MAIN PROGRAM!!'
 
 CALL initialize_nl
 
-call initialize_wv_sat
+!..If there are other initialization routines that need to be run from fwd_model module, add below
+!call initialize_wv_sat
 
 !..
 !OPEN  ( unit_nl, FILE='namelist.input', FORM='formatted', ACTION='read',             &
