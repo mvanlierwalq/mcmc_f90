@@ -1,0 +1,492 @@
+!..Namelist for new scheme
+
+!..BASE FILE in 01_rxx directory copied from namelist_BOSSM0M3_1all_3MORR_00_r06.input
+!..quadruple obs error
+!..
+!..boss_BOSSM0M3_1all_3MORR_01_r22.nc
+!..Copied from 01_r00, scale_s_n and init_par_var increased to 0.25 from 0.15
+!..Copied from 01_r01, bounds changed to match best estimate, new first guess 
+!..Copied from 01_r07, testing highter init_par_var
+!..Copied from 01_r08, testing medium init_par_var, lower scale_s_n
+!..Copied from 01_r09, run to 20M iter, output every 100
+!..Copied from 01_r15, run to 50M, with fwd_obs output
+!..Copied from 01_r22, different random number (7, not 6) and fixed ic_vec output (hopefully)
+
+!..Forward model parameters (read by fwd_model.f90)
+&RECORD0
+  qtop          = 1.e-3
+  ntop          = 5.e2
+  !obs_slices    = 38,34,30,26,22,18,14,10,6,2        !..Ten levels, every fourth level, basically
+  !obs_slices    = 76,68,60,52,44,36,28,20,12,4       !..Ten levels, every eigth level, basically
+  dt = 5.
+  output_nsteps = 12
+  t_slices      = 4, 10, 16, 22, 28, 34, 40, 46, 52, 58
+  !t_slices      = 40,42,43,46,48,50,52,54,56,58
+  obs_slices    =  3, 8, 13, 18
+  !obs_slices    = 20,18,14,10,6        !..Five levels, every fourth level, basically
+  !obs_slices    = 20,19,18,16,14,12,10,8,6,4        !..Five levels, every fourth level, basically
+  !obs_slices    = 60,50,40,30,20,10,1   !..Seven levels, every tenth level, basically
+  obs_in_db     = .TRUE.  !..Whether obs will be compared in db (.TRUE.) or mm^6/m^3/m/s (.FALSE.)
+  !                m0c,   m3c,   m0p,   m3p,   twp, m0flux, m3flux
+  min_obs       =  20., -110.,  -20., -150.,  -50.,     0.,  -150.    !..Values below this value will be set to this value.
+ !NTERMS        ::  number of power law terms.
+  !               ! cevap, cfall, cauto, coal, break, evap, fall, auto, accr, raccr, ccoal, cauto_raindep, auto_raindep
+  nterms        =       1,     1,     1,    1,     0,    1,    1,    1,    1,     0,     0,             0,            0
+  normalized    = .TRUE.
+/
+!..Bin model parameters (read by fwd_model.f90)
+&RECORD1
+  ic_type       = 'obs_file'
+/
+!..MCMC parameters (read by main.f90)
+&RECORD2
+  nchain          = 50
+  nchain_lhs      = 10
+  nmc             =  1000000
+  set_guess       = .TRUE.
+  nguess          = 1
+  nparams         = 28
+  out_file        = 'CLOUDBOSS_marcus_bulk_v02_r09.nc'
+  !..
+  sim_obs         = .FALSE.
+  morr_obs        = .TRUE.    !..Whether to use 'obs' from simulation using MORR bulk microphysics (needs sim_obs = .FALSE.)
+  cov_check       = 1000      ! Minimum Number of MCMC iterations before proposal variance updates in burn in
+  cov_mem         = 1000      ! Number of MCMC iterations to store for computing proposal variance in burn in
+  max_burn        = 10000     ! Maximum number of burn iterations--the code will choose the minimum of either this or 0.5 * ntarget
+  scale_s_n       = 0.20      ! Scale factor on s_n in Gaussian perturbation
+  init_par_var    = 0.02      !...Initial variance of parameters, in units of full parameter range.
+  uniform_dist    = .FALSE.   !...Flag, whether to sample uniformly the parameter space (no obs constraint)
+  cov_prop        = .TRUE.   !...Flag, whether to sample with correlated proposal or not
+  n_adapt         = 5000 
+  adaptive        = .TRUE.    !...Flag, whether to implement the adaptive Metropolis algorithm (Haario et al 2001)
+  max_delay_lev   = 1         !...How many delayed rejections to allow, (>1 uses delayed rejection algorithm - Green et al 2001)
+  skip_burn       = .FALSE.   !...Skip burn-in and use 'initial' proposal std. dev. or covariance?
+  dr_star         = .TRUE.    !..Use intermediate point y* = z-(y-x) (TRUE) or y* = y (FALSE)
+  !sim_annealing   = .true.    !...Whether to do "pre-sampling" using the simulated annealing algorithm
+  obs_err_mult    = 50.
+  use_alt_obs     = .FALSE.   !..For moments, this MUST be .FALSE.
+  !monotonic       = .FALSE.   !..Demand monotonic increase in ice-sticking parameters with temperature
+  err_from_file   = .FALSE.   !..Whether to read error from some file, or from namelist (record5)
+  save_fwd_obs    = .TRUE.    !..Whether to save fwd_obs from each MCMC run (DANGER: may be big files)
+  save_obs_alt    = .FALSE.   !..Whether to save obs_alt from each MCMC run (DANGER: may be big files)
+  diagnostic_mod  = 5         !..How often to print diagnostics
+  out_mod         = 5         !..How often to output stuffs
+  ic_filename     = 'lhs_out_l10.dat'
+  scam_burn       = .FALSE.
+  !sim_ann_type    = 4         !..0 = no SA, 1 = Metropolis Hastings, 2 = SA linear, 3 = SA log, 4 = SA sqrt
+  !!invT_scale      = 0.0005     !..Maybe is good for 50,000 runs?? (sqrt scaling)
+  !invT_scale      = 0.0002     !..Maybe is good for 50,000 runs?? (sqrt scaling)
+  !n_sa            = 100000    !..number of SA iterations
+  !sa_file         = 'SA_boss_BOSSM0M3_1all_3MORR_04_r00.nc'
+  !init_par_var_sa = 0.01 
+  sim_ann_type    = 2         !..0 = no SA, 1 = Metropolis Hastings, 2 = SA linear, 3 = SA log, 4 = SA sqrt
+  invT_scale      = 1.e-6     !..Maybe is good for 50,000 runs?? (sqrt scaling)
+  n_sa            = 100     !..number of SA iterations
+  sa_file         = 'SA_CLOUDBOSS_marcus_bulk_v02_r09.nc'
+  init_par_var_sa = 0.001 
+  !sim_ann_type    = 3         !..0 = no SA, 1 = Metropolis Hastings, 2 = SA linear, 3 = SA log, 4 = SA sqrt
+  !invT_scale      = 0.02      !..Maybe is good for 50,000 runs?? (sqrt scaling)
+  !n_sa            = 50000    !..number of SA iterations
+  !sa_file         = 'SA_boss_BOSSM0M3_1all_3MORR_04_r00.nc'
+  !init_par_var_sa = 0.050
+  cov_file         = '/home/mvanlier/BOSS_out/boss_BOSSM0M3_1all_01_r10.nc'
+  sigma_unknown  = .FALSE.
+/
+!..MCMC values (read by main.f90)
+&RECORD3
+ !..NOTE..NOTE..NOTE.....a-parameters are either "weird" or in log-10 units
+ !PTRUE         ::   Parameters to generate obs. Only used if sim_obs==.TRUE. 
+ !            -    New parameters, evap/sed fit to 2M MORR as of 04/03/2018 - FIX 06/06/18
+!..The following is copied from namelist_CLOUDBOSS_bulk_v01_r01.input, and a-parameters for
+!..q-processes are changed so that they refer to moments and not q/n
+!ptrue       = 1.38245811739106e-16        !..aqevap precip   1 
+!              -0.354039104790238          !..bqevap precip   2 
+!              2.74376111745157e-19        !..anevap precip   3 
+!              -2.3027916656592            !..bnevap precip   4
+!              158343.476031095            !..aqfall precip   5 
+!              0.39348467718868            !..bqfall precip   6 
+!              12605775.5929802            !..anfall precip   7 
+!              0.763683269450867           !..bnfall precip   8 
+!              1.73810171891414            !..aqevap cloud    9 
+!              0.521588214629766           !..bqevap cloud   10
+!                                            !..anevap cloud    
+!                                            !..bnevap cloud    
+!              0.0145476424897715          !..aqfall cloud   11 
+!              0.637966685713455           !..bqfall cloud   12 
+!              0.146351746581604           !..anfall cloud   13 
+!              0.853770933369008           !..bnfall cloud   14 
+!              174770343752.008            !..acoal  precip  15 
+!              1.8418263777878             !..bcoal  precip  16
+!              6.5232667120552e+24         !..aqauto precip  17 
+!              3.76836594211216            !..bqauto precip  18
+!              1.38655161543426e+41        !..anauto precip  19 
+!              3.68968114118637            !..bnauto precip  20
+!              7.56248917897847e+34        !..anauto cloud   21 
+!              8.62669074989242            !..bnauto cloud   22
+!              49269.2517386909            !..aqaccr precip  23 
+!              1.37198220950913            !..bqaccr precip  24 
+!              0.826254482125205           !..bqaccr cloud   25 
+!              2.1511078921688e+28         !..anaccr precip  26 
+!              0.41770896633723            !..bnaccr precip  27
+!              1.89448162992773            !..bnaccr cloud   28
+ptrue        =  1.35923436149657e-16         !..aqevap precip   1 
+                -0.370783069953083           !..bqevap precip   2 
+                1.15850378948813e-22         !..anevap precip   3 
+                -2.60916937188161            !..bnevap precip   4
+                240235.045461195             !..aqfall precip   5 
+                0.409032395199639            !..bqfall precip   6 
+                51192288.6317362             !..anfall precip   7 
+                0.82528608871862             !..bnfall precip   8 
+                1.80753605159055             !..aqevap cloud    9 
+                0.522409193198338            !..bqevap cloud   10
+                                               !..anevap cloud    
+                                               !..bnevap cloud    
+                0.00429965618592691          !..aqfall cloud   11 
+                0.617512555828251            !..bqfall cloud   12 
+                0.15636939663435             !..anfall cloud   13 
+                0.852453585094401            !..bnfall cloud   14 
+                65766872360.1049             !..acoal  precip  15 
+                1.74959057024364             !..bcoal  precip  16
+                7.36257873965239e+24         !..aqauto precip  17 
+                3.7719243658404              !..bqauto precip  18
+                1.64852088035308e+40         !..anauto precip  19 
+                3.58094151535731             !..bnauto precip  20
+                2.18066138464539e+35         !..anauto cloud   21 
+                8.82300148750503             !..bnauto cloud   22
+                202649.920906367             !..aqaccr precip  23 
+                1.41415477113883             !..bqaccr precip  24 
+                0.876775907384405            !..bqaccr cloud   25 
+                1.01140911978487e+28         !..anaccr precip  26 
+                0.368047216791079            !..bnaccr precip  27
+                1.9239943319593              !..bnaccr cloud   28
+  !.............................
+ !PMIN          ::   Minimum value, for uniform prior distributions
+ !                   NOTE! IF (pnaught /= 999) THEN the value used actually = -10**(pmin)
+ !                   and pmin = the log of the absolute value of the minimum
+  pmin          = -30.                   !..aqevap precip   1 
+                  -2.5                   !..bqevap precip   2 
+                  -30.                   !..anevap precip   3 
+                  -4.                    !..bnevap precip   4 
+                  -5.                    !..aqfall precip   5 
+                  -0.5                   !..bqfall precip   6 
+                  -5.                    !..anfall precip   7 
+                  -0.5                   !..bnfall precip   8 
+                  -30.                   !..aqevap cloud    9 
+                  -2.5                   !..bqevap cloud   10 
+                 ! -10.                     !..anevap cloud    
+                 ! -4.0                     !..bnevap cloud    
+                  -15.0                  !..aqfall cloud   11 
+                  -0.5                   !..bqfall cloud   12 
+                  -10.0                  !..anfall cloud   13 
+                  -0.5                   !..bnfall cloud   14 
+                  -10.                   !..acoal  precip  15 
+                  0.5                    !..bcoal  precip  16 
+                  10.5                   !..aqauto precip  17 
+                  0.0                    !..bqauto precip  18 
+                  20.                    !..anauto precip  19 
+                  0.0                    !..bnauto precip  20 
+                  10.                    !..anauto cloud   21 
+                  -0.5                   !..bnauto cloud   22 
+                  -2.0                   !..aqaccr precip  23 
+                  -0.5                   !..bqaccr precip  24 
+                  -1.0                   !..bqaccr cloud   25 
+                  0.                     !..anaccr precip  26 
+                  0.                     !..bnaccr precip  27 
+                  -1.0                   !..bnaccr cloud   28 
+  !.............................
+ !PMAX          ::   Maximum value, for uniform prior distributions 
+  pmax          = 10.0                   !..aqevap precip   1
+                  2.0                    !..bqevap precip   2
+                  3.0                    !..anevap precip   3
+                  2.0                    !..bnevap precip   4
+                 15.0                    !..aqfall precip   5
+                  2.0                    !..bqfall precip   6
+                  15.                    !..anfall precip   7
+                  2.0                    !..bnfall precip   8
+                  10.                    !..aqevap cloud    9
+                  2.0                    !..bqevap cloud   10
+                 !                          !..anevap cloud  
+                 !                          !..bnevap cloud  
+                  5.0                    !..aqfall cloud   11
+                  2.0                    !..bqfall cloud   12
+                  5.0                    !..anfall cloud   13
+                  1.5                    !..bnfall cloud   14
+                  15.                    !..acoal  precip  15
+                  3.0                    !..bcoal  precip  16
+                  100.                   !..aqauto precip  17
+                  15.0                   !..bqauto precip  18
+                  100.                   !..anauto precip  19
+                  10.                    !..bnauto precip  20
+                  50.                    !..anauto cloud   21
+                  15.                    !..bnauto cloud   22
+                  10.                    !..aqaccr precip  23
+                  3.0                    !..bqaccr precip  24
+                  3.0                    !..bqaccr cloud   25 
+                  40.                    !..anaccr precip  26  
+                  3.0                    !..bnaccr precip  27 
+                  2.0                    !..bnaccr cloud   28 
+  !.............................
+ !PFLAG         ::    Flag determining if parameters are perturbed (1) or not (0)
+  pflag         =    1                  !..aqevap precip   1 
+                     1                  !..bqevap precip   2 
+                     1                  !..anevap precip   3 
+                     1                  !..bnevap precip   4 
+                     1                  !..aqfall precip   5 
+                     1                  !..bqfall precip   6 
+                     1                  !..anfall precip   7 
+                     1                  !..bnfall precip   8 
+                     1                  !..aqevap cloud    9 
+                     1                  !..bqevap cloud   10 
+                    !                      !..anevap cloud   
+                    !                      !..bnevap cloud   
+                     1                  !..aqfall cloud   11 
+                     1                  !..bqfall cloud   12 
+                     1                  !..anfall cloud   13 
+                     1                  !..bnfall cloud   14 
+                     1                  !..acoal  precip  15 
+                     1                  !..bcoal  precip  16 
+                     1                  !..aqauto precip  17 
+                     1                  !..bqauto precip  18 
+                     1                  !..anauto precip  19 
+                     1                  !..bnauto precip  20 
+                     1                  !..anauto cloud   21 
+                     1                  !..bnauto cloud   22 
+                     1                  !..aqaccr precip  23 
+                     1                  !..bqaccr precip  24 
+                     1                  !..bqaccr cloud   25 
+                     1                  !..anaccr precip  26 
+                     1                  !..bnaccr precip  27 
+                     1                  !..bnaccr cloud   28 
+  !.............................
+ !FIRST_GUESS   ::    Starting point for the sampler. Used only if set_guess==.TRUE.
+!first_guess = 1.38245811739106e-16        !..aqevap precip   1 
+!              -0.354039104790238          !..bqevap precip   2 
+!              2.74376111745157e-19        !..anevap precip   3 
+!              -2.3027916656592            !..bnevap precip   4
+!              158343.476031095            !..aqfall precip   5 
+!              0.39348467718868            !..bqfall precip   6 
+!              12605775.5929802            !..anfall precip   7 
+!              0.763683269450867           !..bnfall precip   8 
+!              1.73810171891414            !..aqevap cloud    9 
+!              0.521588214629766           !..bqevap cloud   10
+!                                            !..anevap cloud    
+!                                            !..bnevap cloud    
+!              0.0145476424897715          !..aqfall cloud   11 
+!              0.637966685713455           !..bqfall cloud   12 
+!              0.146351746581604           !..anfall cloud   13 
+!              0.853770933369008           !..bnfall cloud   14 
+!              174770343752.008            !..acoal  precip  15 
+!              1.8418263777878             !..bcoal  precip  16
+!              6.5232667120552e+24         !..aqauto precip  17 
+!              3.76836594211216            !..bqauto precip  18
+!              1.38655161543426e+41        !..anauto precip  19 
+!              3.68968114118637            !..bnauto precip  20
+!              7.56248917897847e+34        !..anauto cloud   21 
+!              8.62669074989242            !..bnauto cloud   22
+!              49269.2517386909            !..aqaccr precip  23 
+!              1.37198220950913            !..bqaccr precip  24 
+!              0.826254482125205           !..bqaccr cloud   25 
+!              2.1511078921688e+28         !..anaccr precip  26 
+!              0.41770896633723            !..bnaccr precip  27
+!              1.89448162992773            !..bnaccr cloud   28
+first_guess  =  1.35923436149657e-16         !..aqevap precip   1 
+                -0.370783069953083           !..bqevap precip   2 
+                1.15850378948813e-22         !..anevap precip   3 
+                -2.60916937188161            !..bnevap precip   4
+                240235.045461195             !..aqfall precip   5 
+                0.409032395199639            !..bqfall precip   6 
+                51192288.6317362             !..anfall precip   7 
+                0.82528608871862             !..bnfall precip   8 
+                1.80753605159055             !..aqevap cloud    9 
+                0.522409193198338            !..bqevap cloud   10
+                                               !..anevap cloud    
+                                               !..bnevap cloud    
+                0.00429965618592691          !..aqfall cloud   11 
+                0.617512555828251            !..bqfall cloud   12 
+                0.15636939663435             !..anfall cloud   13 
+                0.852453585094401            !..bnfall cloud   14 
+                65766872360.1049             !..acoal  precip  15 
+                1.74959057024364             !..bcoal  precip  16
+                7.36257873965239e+24         !..aqauto precip  17 
+                3.7719243658404              !..bqauto precip  18
+                1.64852088035308e+40         !..anauto precip  19 
+                3.58094151535731             !..bnauto precip  20
+                2.18066138464539e+35         !..anauto cloud   21 
+                8.82300148750503             !..bnauto cloud   22
+                202649.920906367             !..aqaccr precip  23 
+                1.41415477113883             !..bqaccr precip  24 
+                0.876775907384405            !..bqaccr cloud   25 
+                1.01140911978487e+28         !..anaccr precip  26 
+                0.368047216791079            !..bnaccr precip  27
+                1.9239943319593              !..bnaccr cloud   28
+!first_guess = 2.28714597361551e-15         !..aqevap precip   1 
+!              -0.412495006501224           !..bqevap precip   2 
+!              8.3755561127154e-20          !..anevap precip   3 
+!              -2.41469678719411            !..bnevap precip   4
+!              2722775.06877624             !..aqfall precip   5 
+!              0.487336481628436            !..bqfall precip   6 
+!              704915.28996868              !..anfall precip   7 
+!              0.482252166169342            !..bnfall precip   8 
+!              0.000188412105647796         !..aqevap cloud    9 
+!              0.267268439247797            !..bqevap cloud   10
+!              !..                            !..anevap cloud    
+!              !..                            !..bnevap cloud    
+!              1.25311841992919             !..aqfall cloud   11 
+!              0.631596903015922            !..bqfall cloud   12 
+!              0.927664423056884            !..anfall cloud   13 
+!              0.67760025170315             !..bnfall cloud   14 
+!              1922224203.1671              !..acoal  precip  15 
+!              1.69061900030303             !..bcoal  precip  16
+!              4.51741708433408e+22         !..aqauto precip  17 
+!              2.93751637510649             !..bqauto precip  18
+!              1.77900134140162e+37         !..anauto precip  19 
+!              3.6930716972303              !..bnauto precip  20
+!              1.42461209963767e+34         !..anauto cloud   21 
+!              8.33416245808122             !..bnauto cloud   22
+!              61274.65958181               !..aqaccr precip  23 
+!              1.38634528190067             !..bqaccr precip  24 
+!              0.882166150998055            !..bqaccr cloud   25 
+!              3.74805917190395e+23         !..anaccr precip  26 
+!              0.268269605069825            !..bnaccr precip  27
+!              1.83259277558424             !..bnaccr cloud   28
+  !.............................
+ !MONOTONIC     ::    ONLY works for adjacent parameters, relative value (> 0) is enforced
+  monotonic     =    0                    !..aqevap precip   1
+                     0                    !..bqevap precip   2
+                     0                    !..anevap precip   3
+                     0                    !..bnevap precip   4
+                     0                    !..aqfall precip   5
+                     0                    !..bqfall precip   6
+                     0                    !..anfall precip   7
+                     0                    !..bnfall precip   8
+                     0                    !..aqevap cloud    9
+                     0                    !..bqevap cloud   10
+                   !                        !..anevap cloud   
+                   !                        !..bnevap cloud   
+                     0                    !..aqfall cloud   11
+                     0                    !..bqfall cloud   12
+                     0                    !..anfall cloud   13
+                     0                    !..bnfall cloud   14
+                     0                    !..acoal  precip  15
+                     0                    !..bcoal  precip  16
+                     0                    !..aqauto precip  17
+                     0                    !..bqauto precip  18
+                     0                    !..anauto precip  19
+                     0                    !..bnauto precip  20
+                     0                    !..anauto cloud   21
+                     0                    !..bnauto cloud   22
+                     0                    !..aqaccr precip  23
+                     0                    !..bqaccr precip  24
+                     0                    !..bqaccr cloud   25
+                     0                    !..anaccr precip  26
+                     0                    !..bnaccr precip  27
+                     0                    !..bnaccr cloud   28
+  !.............................
+  !PNAUGHT      ::    Only applicable for log-a parameters that have >1 term
+  !..                 < -900 :: For prefactors (a-parameters) of turned-OFF processes  
+  !..                           Sets model-useable value to -100., inv map to 0.01
+  !..                           does not do mapping to/from weird log-lin-log space
+  !..                           This is because parameters are passed to BOSS via 10**(a_parameter)
+  !..                           WRONG FIX DIS
+  !..                 in betw:: does mapping to/from sample space (0-1) to 
+  !..                           weird log-lin-log transformed space (model-useable vals)
+  !..                 >  900 :: Leaves value unchanged (does no conversion)
+  !..                 > 9000 :: Does sampling in log10 space
+  pnaught       = 9999.                   !..aqevap precip   1
+                   999.                   !..bqevap precip   2
+                  9999.                   !..anevap precip   3
+                   999.                   !..bnevap precip   4
+                  9999.                   !..aqfall precip   5
+                   999.                   !..bqfall precip   6
+                  9999.                   !..anfall precip   7
+                   999.                   !..bnfall precip   8
+                  9999.                   !..aqevap cloud    9
+                   999.                   !..bqevap cloud   10
+                !                           !..anevap cloud   
+                !                           !..bnevap cloud   
+                  9999.                   !..aqfall cloud   11
+                   999.                   !..bqfall cloud   12
+                  9999.                   !..anfall cloud   13
+                   999.                   !..bnfall cloud   14
+                  9999.                   !..acoal  precip  15
+                   999.                   !..bcoal  precip  16
+                  9999.                   !..aqauto precip  17
+                   999.                   !..bqauto precip  18
+                  9999.                   !..anauto precip  19
+                   999.                   !..bnauto precip  20
+                  9999.                   !..anauto cloud   21
+                   999.                   !..bnauto cloud   22
+                  9999.                   !..aqaccr precip  23
+                   999.                   !..bqaccr precip  24
+                   999.                   !..bqaccr cloud   25
+                  9999.                   !..anaccr precip  26
+                   999.                   !..bnaccr precip  27
+                   999.                   !..bnaccr cloud   28
+  !P_LINSPACE_RATIO :: Only applicable for log-a parameters that have >1 term
+  p_linspace_ratio=999.                   !..aqevap precip   1
+                   999.                   !..bqevap precip   2
+                   999.                   !..anevap precip   3
+                   999.                   !..bnevap precip   4
+                   999.                   !..aqfall precip   5
+                   999.                   !..bqfall precip   6
+                   999.                   !..anfall precip   7
+                   999.                   !..bnfall precip   8
+                   999.                   !..aqevap cloud    9
+                   999.                   !..bqevap cloud   10
+                !                           !..anevap cloud   
+                !                           !..bnevap cloud   
+                   999.                   !..aqfall cloud   11
+                   999.                   !..bqfall cloud   12
+                   999.                   !..anfall cloud   13
+                   999.                   !..bnfall cloud   14
+                   999.                   !..acoal  precip  15
+                   999.                   !..bcoal  precip  16
+                   999.                   !..aqauto precip  17
+                   999.                   !..bqauto precip  18
+                   999.                   !..anauto precip  19
+                   999.                   !..bnauto precip  20
+                   999.                   !..anauto cloud   21
+                   999.                   !..bnauto cloud   22
+                   999.                   !..aqaccr precip  23
+                   999.                   !..bqaccr precip  24
+                   999.                   !..bqaccr cloud   25
+                   999.                   !..anaccr precip  26
+                   999.                   !..bnaccr precip  27
+                   999.                   !..bnaccr cloud   28
+  gauss_prior = .false.
+  prior_icovfile = "prior_icov_79micron.txt"
+  prior_meanfile = "prior_mean_79micron.txt"
+/
+!..Values to use in initializing nobs
+&RECORD4
+  Npol          =  4                  !..Number of vertically-resolved "obs" types (does not include precip rate)
+  Nz            = 20                  !..Number of vertical levels in forward simulation
+  Nt            = 60   
+  obs_nslice    =  4                  !..Number of vertical slices to use as obs constraint
+  t_nslice      =  10                 !..Number of time indices to draw obs from
+  nsims         =  8                  !..Number of simulations to use in obs constraint
+  nscalarobs    =  3                  !..Number of scalar obs (such as precip rate)
+  irain         =  0                  !..Switch for KK (=0) or SB (=1) or BR (=2)
+  obs_from_file = .FALSE.
+  obs_file = "bin_ref_79micron.nc"
+  disable_ncevap = .true. 
+  disable_breakup = .true.
+  disable_ccoal = .false.
+  add_rain_pert = .false.
+  activation_scheme = 'match_bulk'
+  force_proportional_auto = .FALSE.
+  force_proportional_accr = .FALSE.
+  force_proportional_evap = .FALSE.
+  cutoff_diameter = 79.37005259840998d-6
+/
+&RECORD5
+  !!..            m0c   m3c    m0p   m3p   twp     m0flux   m3flux
+  sigma_file  =   0.5   0.5    0.5   0.5   0.5     0.5      0.5
+  obs_err_file  = '../bogus_path/bogus_file'          !..a placeholder
+/
+&RECORD6
+  lhs_flag = .false.  !..Use LHS to generate IC's for fake constraint (.T.), or read from file (.F.)
+  alt_proc = .TRUE.  !..Alternative obs output is (4) process rates at (3) levels for all nsims
+!&RECORD7
+!  mono_arr =   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0
+/
